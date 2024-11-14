@@ -34,6 +34,13 @@ Section "ServerFlags"
     Option "DontVTSwitch" "true"
 EndSection
 EOF
+#disable screen blanking for signage solution
+cat /etc/X11/xorg.conf.d/10-serverflags.conf <<EOF
+Section "ServerFlags"
+    Option "BlankTime" "0"
+    Option "DPMS" "false"
+EndSection
+EOF
 
 # create config
 if [ -e "/etc/lightdm/lightdm.conf" ]; then
