@@ -1,4 +1,18 @@
 #!/bin/bash
+#fancy colors and font options (a work in progress)
+NORMAL=''
+GREEN=''
+RED=''
+ITALIC=''
+BOLD=''
+if tty -s; then
+  NORMAL="$(tput sgr0)"
+  GREEN=$(tput setaf 2)
+  RED="$(tput setaf 1)"
+  BOLD=$(tput bold)
+  ITALIC=$(tput sitm)
+fi
+
 #Set some options for the kiosk/signage
 # We use a google slide with options like this: embed?&start=true&loop=true&rm=minimal&delayms=10000
 # Prompt the user for their choice
@@ -91,6 +105,8 @@ xset s noblank       # Disable screen blanking
 xset -dpms           # Disable power management
 #hide mouse
 unclutter -idle 0.1 -grab -root &
+#pause for a second to avoid "no internet error on chromium launch"
+sleep 5
 #set chromium options
 while :
 do
@@ -117,4 +133,40 @@ do
 done &
 EOF
 
-echo "Done!"
+# Display the current hostname
+echo "The current hostname is: $(hostname)"
+
+# Ask if the hostname should be changed
+read -p "${GREEN}${BOLD}Would you like to change the hostname? (y/n):${NORMAL} " response
+
+if [[ "$response" == "y" || "$response" == "Y" ]]; then
+  # Prompt for the new hostname
+  read -p "Enter the new hostname: " new_hostname
+  
+  # Set the new hostname
+  hostnamectl set-hostname "$new_hostname"
+  
+  # Update /etc/hosts file to map the new hostname to 127.0.1.1
+  sed -i "s/127.0.1.1 .*/127.0.1.1 $new_hostname/" /etc/hosts
+  
+  echo "${GREEN}${BOLD}Hostname changed to $new_hostname. A reboot might be required for all changes to take effect."
+else
+  echo "${RED}${BOLD}Hostname not changed.${NORMAL}"
+fi
+
+# Install Zabbix agent2 and add to your zabbix server to monitor device.
+# change <ipaddress> to your server of comment this all out.
+apt-get install zabbix-agent2 -y
+# Configure Zabbix agent to connect to the Zabbix server
+sed -i "s/^Server=.*/Server=<ipaddress>/" /etc/zabbix/zabbix_agent2.conf
+sed -i "s/^ServerActive=.*/ServerActive=<ipaddress>/" /etc/zabbix/zabbix_agent2.conf
+
+# Set the hostname for the Zabbix agent to match the current system hostname
+current_hostname=$(hostname)
+sed -i "s/^Hostname=.*/Hostname=$current_hostname/" /etc/zabbix/zabbix_agent2.conf
+
+# Restart Zabbix agent to apply configuration changes
+systemctl enable zabbix-agent2
+systemctl restart zabbix-agent2
+
+echo "${GREEN}${BOLD}Done!"
