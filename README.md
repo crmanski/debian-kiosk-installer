@@ -1,11 +1,12 @@
 # Kiosk installer for Debian based Linux distros
 Small installer script to setup a minimal kiosk with Chromium for Debian based Linux distros. This installer is heavily based on the excellent [instructions by Will Haley](http://willhaley.com/blog/debian-fullscreen-gui-kiosk/).
---Forked for Signage purposes in December 2024 by Craig
+*--Forked for Signage purposes in December 2024 by Craig
 ## Usage
 * Setup a minimal Debian https://www.debian.org/distrib/ without display manager,  [32-bit PC netinst iso](https://cdimage.debian.org/debian-cd/current/i386/iso-cd/debian-12.8.0-i386-netinst.iso) / [64-bit PC netinst iso](https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.8.0-amd64-netinst.iso)
 * Login as root or with root permissions
-* Download this installer, make it executable and run it
+* Download this installer, place it on an internal webserver, modify as needed, make it executable and run it
 
+Example...
   ```shell
   wget https://raw.githubusercontent.com/crmanski/debian-kiosk-installer/master/kiosk-installer.sh; chmod +x kiosk-installer.sh; ./kiosk-installer.sh
   ```
